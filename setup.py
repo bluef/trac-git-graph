@@ -12,11 +12,11 @@ setup(
 	
 	license = 'BSD',
 	
-	install_requires = ['Genshi >= 0.5', 'Trac >= 0.12', 'TracGit >= 0.12.0.5'],
+	install_requires = ['Genshi >= 0.5', 'Trac >= 0.11'],
 	
-	extras_require = {'Babel': 'Babel>= 0.9.5', 'Trac': 'Trac >= 0.12'},
+	extras_require = {'Babel': 'Babel>= 0.9.5', 'Trac': 'Trac >= 0.11'},
 	
 	packages = ['gitgraph'],
-	package_data = {'gitgraph':['templates/*.html']},
+	package_data = {'gitgraph':['templates/*.html', 'htdocs/*']},
 	entry_points = {'trac.plugins':'gitgraph.graph = gitgraph.graph'},
 )

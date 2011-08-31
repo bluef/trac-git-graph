@@ -8,16 +8,16 @@
   <xi:include href="layout.html" />
   <head>
     <title>Git Graph</title>
-	<style>
-	    #git-graph-container {font-family:'Bitstream Vera Sans Mono','Courier',monospace;}
-		#git-graph-container li {list-style-type:none}	
-	</style>
   </head>
   <body>
     <div id="git-graph-container">
 	<ul>
 		<li py:for="graph_item in graph_list">
-			${graph_item}
+			<span class="node-relation">${graph_item['relation']}</span> 
+			
+			<a href="changeset/${graph_item['rev']}" py:if="graph_item['rev']">
+				<strong>${graph_item['branch']}</strong> <em>${graph_item['subject']}</em> by <span class="author">${graph_item['author']} &lt;${graph_item['author_email']}&gt;</span>  <span class="time">${graph_item['date']}</span>
+			</a>
 		</li>
 	</ul>
     </div>
