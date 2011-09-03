@@ -12,7 +12,8 @@ import re
 
 from trac.core import *
 from trac.web import IRequestHandler
-from trac.web.chrome import INavigationContributor, ITemplateProvider, add_stylesheet
+from trac.web.chrome import INavigationContributor, ITemplateProvider, \
+							add_stylesheet, add_script
 from trac.util import escape, Markup
 
 class GitGraph(Component):
@@ -57,6 +58,10 @@ class GitGraph(Component):
 		
 		data = {'graph_list':graph_list}
 		add_stylesheet(req, 'gitgraph/gitgraph.css')
+		
+		add_script(req, 'gitgraph/jquery.js')
+		add_script(req, 'gitgraph/gitgraph.js')
+		add_script(req, 'gitgraph/chart.js')
 		return 'graph.html', data, None
 
 	# ITemplateProvider methods
