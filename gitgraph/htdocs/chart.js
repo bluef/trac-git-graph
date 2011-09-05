@@ -9,5 +9,7 @@ $(document).ready(function () {
 		graphList.push($(this).text());
 	})
 	
-	gitGraph(document.getElementById('graph-canvas'), graphList)
+	gitGraph(document.getElementById('graph-canvas'), graphList);
+	
+	$("#rev-container").css("width", document.body.clientWidth - document.getElementById('graph-canvas').width);
 })

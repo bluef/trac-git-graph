@@ -11,7 +11,7 @@
   </head>
   <body>
     <div id="git-graph-container">
-    	<div style="float:left">
+    	<div id="rel-container">
 	    	<canvas id="graph-canvas" width="100px">
 				<ul id="graph-raw-list">
 					<li py:for="graph_item in graph_list">
@@ -21,8 +21,8 @@
 			</canvas>
 		</div>
 		
-		<div style="float:left;">
-			<ul id="graph-raw-list" style="margin:0;padding:0 5px 0 0">
+		<div style="float:left;" id="rev-container">
+			<ul id="rev-list">
 				<li py:for="graph_item in graph_list" py:choose="">
 					<a href="changeset/${graph_item['rev']}" py:when="graph_item['rev']">
 						<strong>${graph_item['branch']}</strong> <em>${graph_item['subject']}</em> by <span class="author">${graph_item['author']} &lt;${graph_item['author_email']}&gt;</span>  <span class="time">${graph_item['date']}</span>
