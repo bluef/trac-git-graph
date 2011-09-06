@@ -96,6 +96,20 @@ var gitGraph = function (canvas, rawGraphList, config) {
 		return i;
 	};
 	
+	var findBranchOut = function (row) {
+		if (!row) {
+			return -1
+		}
+		
+		var i = row.length;
+		
+		while (i-- && 
+			!(row[i - 1] && row[i] === "/" && row[i - 1] === "|") &&
+			!(row[i - 2] && row[i] === "_" && row[i - 2] === "|")) {}
+		
+		return i;
+	}
+	
 	var genNewFlow = function () {
 		var newId;
 		
@@ -161,7 +175,7 @@ var gitGraph = function (canvas, rawGraphList, config) {
 		var flowSwapPos = -1;
 		var lastLinePos;
 		var i, k;
-		var condenseLength;
+		var condenseCurrentLength, condensePrevLength = 0, condenseNextLength = 0;
 		
 		var inlineIntersect = false;
 		
@@ -177,6 +191,18 @@ var gitGraph = function (canvas, rawGraphList, config) {
 			prevRow = graphList[i - 1];
 			
 			flowSwapPos = -1;
+			
+			condenseCurrentLength = currentRow.filter(function (val) {
+				return (val !== " "  && val !== "_")
+			}).length;
+			
+			if (nextRow) {
+				condenseNextLength = nextRow.filter(function (val) {
+					return (val !== " "  && val !== "_")
+				}).length;
+			} else {
+				condenseNextLength = 0;
+			}
 			
 			//pre process begin
 			//use last row for analysing
@@ -203,15 +229,11 @@ var gitGraph = function (canvas, rawGraphList, config) {
 					}
 				}
 				
-				if (prevRowLength < currentRow.length &&
+				if (condensePrevLength < condenseCurrentLength &&
 					((nodePos = findColomn("*", currentRow)) !== -1 &&
 					(findColomn("_", currentRow) === -1))) {
 					
-					if ((outPos = findColomn("/", prevRow)) === -1 || 
-						(outPos !== -1 && prevRow[outPos - 1] && prevRow[outPos - 1] !== "|")) {
-						
-						flows.splice(nodePos - 1, 0, genNewFlow());
-					}
+					flows.splice(nodePos - 1, 0, genNewFlow());
 				}
 				
 				if (prevRowLength > currentRow.length &&
@@ -229,8 +251,25 @@ var gitGraph = function (canvas, rawGraphList, config) {
 			prevRowLength = currentRow.length; //store for next round
 			colomnIndex = 0; //reset index
 			condenseIndex = 0;
+			condensePrevLength = 0;
 			while (colomnIndex < currentRow.length) {
 				colomn = currentRow[colomnIndex];
+				
+				if (colomn !== " " && colomn !== "_") {
+					++condensePrevLength;
+				}
+				
+				if (colomn === " " && 
+					currentRow[colomnIndex + 1] &&
+					currentRow[colomnIndex + 1] === "_" &&
+					currentRow[colomnIndex - 1] && 
+					currentRow[colomnIndex - 1] === "|") {
+					
+					currentRow.splice(colomnIndex, 1);
+					
+					currentRow[colomnIndex] = "/";
+					colomn = "/";
+				}
 				
 				//create new flow only when no intersetc happened
 				if (flowSwapPos === -1 &&
@@ -241,17 +280,20 @@ var gitGraph = function (canvas, rawGraphList, config) {
 					flows.splice(condenseIndex, 0, genNewFlow());
 				}
 				
-				//change \ to | when it's in the last position of the whole row
-				if ((colomnIndex === currentRow.length - 1) &&
-					(colomn === "/" || colomn === "\\") &&
-					((lastLinePos = findColomn("|", currentRow)) !== -1 ||
-					(lastLinePos = findColomn("*", currentRow)) !== -1) &&
-					(lastLinePos < colomnIndex - 1)) {
-					
-					while (++lastLinePos && currentRow[lastLinePos] === " ") {}
-					
-					if (lastLinePos === colomnIndex) {
-						currentRow[colomnIndex] = "|";
+				//change \ and / to | when it's in the last position of the whole row
+				
+				if (colomn === "/" || colomn === "\\") {
+					if (!(colomn === "/" && findBranchOut(nextRow) === -1)) {
+						if ((lastLinePos = Math.max(findColomn("|", currentRow), 
+													findColomn("*", currentRow))) !== -1 &&
+							(lastLinePos < colomnIndex - 1)) {
+							
+							while (currentRow[++lastLinePos] === " ") {}
+							
+							if (lastLinePos === colomnIndex) {
+								currentRow[colomnIndex] = "|";
+							}
+						}
 					}
 				}
 				
@@ -268,12 +310,12 @@ var gitGraph = function (canvas, rawGraphList, config) {
 				++colomnIndex;
 			}
 			
-			condenseLength = currentRow.filter(function (val) {
+			condenseCurrentLength = currentRow.filter(function (val) {
 				return (val !== " "  && val !== "_")
 			}).length;
 			
-			if (flows.length > condenseLength) {
-				flows.splice(condenseLength, flows.length - condenseLength);
+			if (flows.length > condenseCurrentLength) {
+				flows.splice(condenseCurrentLength, flows.length - condenseCurrentLength);
 			}
 			
 			colomnIndex = 0;
